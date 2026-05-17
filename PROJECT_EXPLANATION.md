@@ -75,3 +75,29 @@ This pipeline is "Advanced" because it implements:
 - **RRF Fusion**: Intelligently blending multiple search strategies.
 - **Cross-Encoder Reranking**: Acting as a strict filter to ensure the LLM doesn't get confused by mildly-related but unhelpful chunks.
 - **Full Traceability**: Exposing the "black box" so developers can see the exact math and logic behind why a specific chunk was chosen.
+
+---
+
+## 🛠️ Production Roadmap & Security Hardening
+
+As a **Proof of Concept (POC)** designed for local presentation and architectural demonstration, several production-grade features have been omitted for simplicity. For a production rollout, the following enhancements would be prioritized:
+
+### 1. Identity & Access Management (IAM)
+- **Authentication**: Integrate **OAuth2 / OIDC** (e.g., Auth0, Keycloak) for secure user login.
+- **Authorization**: Implement **Role-Based Access Control (RBAC)** to ensure users can only view or query their own datasets.
+
+### 2. Enterprise Secret Management
+- **Key Rotation**: Move API keys (like Groq) from process memory to a dedicated **Secret Manager** (e.g., AWS Secrets Manager, HashiCorp Vault).
+- **Environment Parity**: Utilize secure environment variable injection rather than `.env` files for cloud deployments.
+
+### 3. Data Isolation & Multi-tenancy
+- **Qdrant Filtering**: Utilize Qdrant's **payload filtering** to isolate data between different users or teams within the same collection.
+- **Metadata Tagging**: Ensure every chunk is tagged with an owner ID at ingestion for strict retrieval-level isolation.
+
+### 4. Input Sanitization & Content Safety
+- **CSV/Excel Sanitization**: Implement protection against **Formula Injection** (CSV injection) by sanitizing cells starting with `=`, `+`, `-`, or `@`.
+- **LLM Guardrails**: Add a moderation layer (like Groq's moderation or Llama Guard) and strictly define system prompts to prevent **Prompt Injection** and jailbreaking.
+
+### 5. Infrastructure & Performance
+- **Asynchronous Processing**: Move heavy ingestion tasks from Flask request threads to a task queue like **Celery** or **Redis Queue**.
+- **CORS Hardening**: Transition from the current localhost-only restriction to a strict whitelist of production domains.

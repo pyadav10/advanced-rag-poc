@@ -133,3 +133,17 @@ Issue_ID | Issue_Type | Summary | Description | Priority | Status |
 Component | Labels | Preconditions | Test_Steps | Expected_Result |
 Actual_Result | Test_Data
 ```
+
+---
+
+## 🛠️ Roadmap & Security
+
+While this project is a functional POC, it is architected with production-grade security in mind. Future enhancements for an enterprise rollout would include:
+
+- **Identity & Access Management:** Integration with OAuth2/OIDC for secure user authentication.
+- **Enterprise Secret Management:** Moving API keys to a dedicated vault (e.g., AWS Secrets Manager).
+- **Multi-tenancy:** Implementing Qdrant payload filters for strict data isolation between users.
+- **Input Hardening:** Sanitizing CSV/Excel uploads to prevent formula injection.
+- **LLM Guardrails:** Implementing prompt injection defense layers and content moderation.
+
+*See [PROJECT_EXPLANATION.md](./PROJECT_EXPLANATION.md) for a detailed breakdown of the production roadmap.*
