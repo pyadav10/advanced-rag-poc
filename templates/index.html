@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Advanced RAG Explorer — VWO Test Cases</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#1a1814;--surface:#242019;--surface2:#2e2921;--border:#3d3830;
+  --accent:#d97706;--accent2:#b45309;--accent-glow:rgba(217,119,6,.18);
+  --purple:#9b8ec4;--green:#4ade80;--red:#f87171;--blue:#60a5fa;
+  --text:#f5efe6;--text2:#c4b89a;--text3:#8a7d68;
+  --sidebar:260px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+/* ── Top Bar ── */
+.topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px;position:sticky;top:0;z-index:100}
+.topbar-logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:1rem;color:var(--text)}
+.topbar-logo svg{width:28px;height:28px}
+.topbar-divider{width:1px;height:22px;background:var(--border)}
+.topbar-subtitle{font-size:.8rem;color:var(--text3);font-weight:400}
+.topbar-spacer{flex:1}
+.key-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-size:.75rem;padding:5px 12px;border-radius:6px;cursor:pointer;transition:.2s}
+.key-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── Layout ── */
+.layout{display:flex;flex:1;overflow:hidden;height:calc(100vh - 52px)}
+
+/* ── Sidebar ── */
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.sidebar-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;margin:1px 6px;border-radius:8px;cursor:pointer;font-size:.83rem;color:var(--text2);transition:.15s;user-select:none}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-glow);color:var(--accent);font-weight:500}
+.nav-item .icon{font-size:1rem;width:18px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--accent);color:#000;font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:10px}
+.sidebar-sep{height:1px;background:var(--border);margin:10px 12px}
+.sidebar-stat{padding:8px 14px;font-size:.75rem;color:var(--text3)}
+.sidebar-stat span{color:var(--accent);font-weight:600}
+
+/* ── Main Panel ── */
+.main{flex:1;overflow-y:auto;padding:24px}
+
+/* ── Section cards ── */
+.section{display:none}.section.active{display:block}
+.page-title{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.page-sub{font-size:.85rem;color:var(--text3);margin-bottom:20px}
+
+/* ── Upload zone ── */
+.upload-zone{border:2px dashed var(--border);border-radius:14px;padding:40px 24px;text-align:center;cursor:pointer;transition:.2s;background:var(--surface);margin-bottom:20px}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:var(--accent-glow)}
+.upload-icon{font-size:2.5rem;margin-bottom:12px}
+.upload-title{font-size:1rem;font-weight:600;margin-bottom:6px}
+.upload-sub{font-size:.82rem;color:var(--text3)}
+#file-input{display:none}
+.upload-actions{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.btn{padding:9px 20px;border-radius:8px;font-size:.85rem;font-weight:500;cursor:pointer;border:none;transition:.2s;font-family:'Inter',sans-serif}
+.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+.card-title{font-size:.9rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card-title .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+/* ── Stats grid ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.stat-val{font-size:1.6rem;font-weight:700;color:var(--accent)}
+.stat-label{font-size:.73rem;color:var(--text3);margin-top:4px}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{background:var(--surface2);color:var(--text2);font-weight:500;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+
+/* ── Chunk card ── */
+.chunk-card{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:14px;margin-bottom:10px}
+.chunk-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.chunk-badge{background:var(--accent);color:#000;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:12px}
+.meta-pill{background:var(--surface);border:1px solid var(--border);color:var(--text3);font-size:.7rem;padding:2px 8px;border-radius:10px}
+.chunk-text{font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;background:var(--surface);padding:10px 12px;border-radius:6px;color:var(--text2);white-space:pre-wrap}
+.overlap-tag{background:rgba(217,119,6,.2);color:var(--accent);font-size:.68rem;padding:1px 6px;border-radius:4px;font-style:italic}
+
+/* ── Progress ── */
+.progress-wrap{margin-bottom:16px}
+.progress-label{font-size:.8rem;color:var(--text2);margin-bottom:6px;display:flex;justify-content:space-between}
+.progress-bar{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width .3s}
+.progress-steps{max-height:160px;overflow-y:auto;margin-top:10px}
+.progress-step{font-size:.75rem;color:var(--text3);padding:3px 0;border-bottom:1px solid var(--border)}
+.progress-step.active{color:var(--accent)}
+
+/* ── Vector viz ── */
+.vec-bars{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.vec-row{display:flex;align-items:center;gap:8px}
+.vec-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text3);width:24px}
+.vec-track{flex:1;height:8px;background:var(--surface);border-radius:4px;overflow:hidden}
+.vec-fill{height:100%;border-radius:4px}
+.vec-val{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text3);width:70px;text-align:right}
+
+/* ── Chat ── */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 200px)}
+.chat-messages{flex:1;overflow-y:auto;padding:4px 0;display:flex;flex-direction:column;gap:14px}
+.msg{display:flex;gap:10px;max-width:100%}
+.msg-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;margin-top:2px}
+.msg.user .msg-avatar{background:var(--accent);color:#000}
+.msg.assistant .msg-avatar{background:var(--purple);color:#fff}
+.msg-bubble{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-size:.87rem;line-height:1.6;max-width:calc(100% - 50px)}
+.msg.user .msg-bubble{background:var(--accent-glow);border-color:var(--accent)}
+.chat-input-row{display:flex;gap:10px;padding-top:14px;border-top:1px solid var(--border);margin-top:14px}
+.chat-input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:10px;font-family:'Inter',sans-serif;font-size:.88rem;resize:none;min-height:46px;max-height:120px;transition:.2s}
+.chat-input:focus{outline:none;border-color:var(--accent)}
+.send-btn{background:var(--accent);color:#000;border:none;border-radius:10px;padding:0 18px;font-weight:600;cursor:pointer;transition:.2s;font-size:.88rem}
+.send-btn:hover{background:var(--accent2)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Pipeline Trace ── */
+.trace-panel{display:flex;flex-direction:column;gap:12px}
+.trace-step{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.trace-step-header{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:.15s}
+.trace-step-header:hover{background:var(--surface2)}
+.trace-step-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#000;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.trace-step-title{font-size:.87rem;font-weight:600;flex:1}
+.trace-step-count{font-size:.75rem;color:var(--text3)}
+.trace-chevron{color:var(--text3);transition:.2s}
+.trace-step.open .trace-chevron{transform:rotate(90deg)}
+.trace-step-body{display:none;padding:14px;border-top:1px solid var(--border)}
+.trace-step.open .trace-step-body{display:block}
+
+/* ── Hit card ── */
+.hit-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;font-size:.8rem}
+.hit-header{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+.score-badge{padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+.score-dense{background:rgba(96,165,250,.15);color:var(--blue);border:1px solid rgba(96,165,250,.3)}
+.score-sparse{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.score-rrf{background:rgba(155,142,196,.15);color:var(--purple);border:1px solid rgba(155,142,196,.3)}
+.score-rerank{background:rgba(217,119,6,.15);color:var(--accent);border:1px solid rgba(217,119,6,.3)}
+.score-dropped{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+.hit-text{font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.6;color:var(--text2);max-height:80px;overflow:hidden;text-overflow:ellipsis}
+
+/* ── Answer block ── */
+.answer-block{background:var(--surface2);border:1px solid var(--accent);border-left:4px solid var(--accent);border-radius:10px;padding:16px;font-size:.9rem;line-height:1.7;white-space:pre-wrap}
+.answer-sources{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.source-tag{background:var(--surface);border:1px solid var(--border);color:var(--text3);font-size:.72rem;padding:3px 10px;border-radius:10px}
+
+/* ── Skeleton / Loading ── */
+.skeleton{background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── Utility ── */
+.hidden{display:none!important}
+.flex{display:flex}.gap-8{gap:8px}.mt-12{margin-top:12px}.mb-8{margin-bottom:8px}
+.text-accent{color:var(--accent)}.text-green{color:var(--green)}.text-red{color:var(--red)}.text-muted{color:var(--text3)}
+.tag-green{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3);padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+.tag-amber{background:var(--accent-glow);color:var(--accent);border:1px solid rgba(217,119,6,.3);padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-state .big-icon{font-size:2.5rem;margin-bottom:10px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:10px 18px;border-radius:10px;font-size:.85rem;z-index:999;animation:slide-in .3s ease}
+@keyframes slide-in{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg viewBox="0 0 28 28" fill="none">
+      <circle cx="14" cy="14" r="13" stroke="#d97706" stroke-width="1.5"/>
+      <path d="M7 14 Q14 6 21 14 Q14 22 7 14Z" fill="#d97706" opacity=".8"/>
+      <circle cx="14" cy="14" r="3" fill="#d97706"/>
+    </svg>
+    Advanced RAG Explorer
+  </div>
+  <div class="topbar-divider"></div>
+  <span class="topbar-subtitle">VWO Test Cases · Qdrant + MiniLM + Groq</span>
+  <div class="topbar-spacer"></div>
+  <button class="key-btn" onclick="showKeyModal()">🔑 Set Groq Key</button>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">Stage 1 — Ingestion</div>
+    <div class="nav-item active" id="nav-upload" onclick="showSection('upload')">
+      <span class="icon">📁</span> Upload File
+    </div>
+    <div class="nav-item" id="nav-preview" onclick="showSection('preview')">
+      <span class="icon">👁️</span> Preview & Chunks
+    </div>
+    <div class="nav-item" id="nav-ingest" onclick="showSection('ingest')">
+      <span class="icon">⚙️</span> Run Ingestion
+    </div>
+    <div class="nav-item" id="nav-vectordb" onclick="showSection('vectordb')">
+      <span class="icon">🗄️</span> Qdrant DB Stats
+    </div>
+    <div class="sidebar-sep"></div>
+    <div class="sidebar-section">Stage 2 — Query</div>
+    <div class="nav-item" id="nav-chat" onclick="showSection('chat')">
+      <span class="icon">💬</span> Chat Interface
+    </div>
+    <div class="nav-item" id="nav-trace" onclick="showSection('trace')">
+      <span class="icon">🔍</span> Pipeline Trace
+    </div>
+    <div class="sidebar-sep"></div>
+    <div class="sidebar-section">DB Status</div>
+    <div class="sidebar-stat">Chunks: <span id="sb-chunks">—</span></div>
+    <div class="sidebar-stat">Test Cases: <span id="sb-cases">—</span></div>
+    <div class="sidebar-stat">Model: <span id="sb-model">MiniLM-L6</span></div>
+    <div class="sidebar-stat">Vector DB: <span style="color:var(--green)">Qdrant</span></div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- UPLOAD -->
+    <div class="section active" id="section-upload">
+      <div class="page-title">📁 Upload Test Cases</div>
+      <div class="page-sub">Upload a CSV or Excel file containing your VWO test cases.</div>
+
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()"
+           ondragover="event.preventDefault();this.classList.add('dragover')"
+           ondragleave="this.classList.remove('dragover')"
+           ondrop="handleDrop(event)">
+        <div class="upload-icon">📄</div>
+        <div class="upload-title" id="upload-title">Click to browse or drag & drop</div>
+        <div class="upload-sub">Supports .csv, .xlsx, .xls — up to 50,000 rows</div>
+      </div>
+      <input type="file" id="file-input" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(this)"/>
+
+      <div id="upload-file-info" class="card hidden">
+        <div class="card-title"><span class="dot"></span> Selected File</div>
+        <div id="file-details" style="font-size:.85rem;color:var(--text2)"></div>
+        <div class="upload-actions" style="justify-content:flex-start;margin-top:12px">
+          <button class="btn btn-primary" onclick="runPreview()">👁️ Preview Chunks</button>
+          <button class="btn btn-secondary" onclick="clearFile()">✕ Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="section" id="section-preview">
+      <div class="page-title">👁️ Preview & Chunk Visualization</div>
+      <div class="page-sub">See how your test cases are split into chunks before ingestion.</div>
+      <div id="preview-content">
+        <div class="empty-state"><div class="big-icon">📂</div>Upload a file first to see the preview.</div>
+      </div>
+    </div>
+
+    <!-- INGEST -->
+    <div class="section" id="section-ingest">
+      <div class="page-title">⚙️ Run Ingestion</div>
+      <div class="page-sub">Embed all chunks and store them in Qdrant. This runs once.</div>
+      <div id="ingest-content">
+        <div class="empty-state"><div class="big-icon">📂</div>Upload a file first.</div>
+      </div>
+    </div>
+
+    <!-- VECTOR DB -->
+    <div class="section" id="section-vectordb">
+      <div class="page-title">🗄️ Qdrant Vector DB Stats</div>
+      <div class="page-sub">Inspect what's stored: chunks, metadata, embedding dimensions.</div>
+      <div id="vectordb-content">
+        <div class="empty-state"><div class="big-icon">🗄️</div>Run ingestion first.</div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="section" id="section-chat">
+      <div class="page-title">💬 Chat with Your Test Cases</div>
+      <div class="page-sub">Ask questions or request new test cases. Full RAG pipeline runs on each query.</div>
+      <div class="chat-wrap">
+        <div class="chat-messages" id="chat-messages">
+          <div class="msg assistant">
+            <div class="msg-avatar">🔮</div>
+            <div class="msg-bubble">Hello! I'm your Advanced RAG assistant for VWO test cases.<br><br>
+            Ask me anything like:<br>
+            • <em>"What are the login test cases?"</em><br>
+            • <em>"Create a new test case for Jira ID VWO-1234"</em><br>
+            • <em>"What are the preconditions for A/B test setup?"</em></div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <textarea class="chat-input" id="chat-input" placeholder="Ask about your test cases…" rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendQuery()}"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendQuery()">Send ↑</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRACE -->
+    <div class="section" id="section-trace">
+      <div class="page-title">🔍 Pipeline Trace</div>
+      <div class="page-sub">Step-by-step breakdown of the last query through the RAG pipeline.</div>
+      <div id="trace-content">
+        <div class="empty-state"><div class="big-icon">🔍</div>Send a query in Chat to see the trace here.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- KEY MODAL -->
+<div id="key-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center">
+  <div class="card" style="width:400px;max-width:90vw">
+    <div class="card-title"><span class="dot"></span>Set Groq API Key</div>
+    <input id="key-input" type="password" placeholder="gsk_…" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:.88rem;margin-bottom:12px"/>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="saveKey()">Save Key</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('key-modal').classList.add('hidden')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/app.js?v=3"></script>
+</body>
+</html>

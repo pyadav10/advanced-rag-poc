@@ -1,0 +1,13 @@
+flask
+flask-cors
+pandas
+openpyxl
+xlrd
+sentence-transformers
+qdrant-client
+rank-bm25
+groq
+torch
+nltk
+numpy
+python-dotenv
