@@ -17,7 +17,11 @@ from pipeline.generator import generate
 from config import DATA_DIR, META_FILE, GROQ_API_KEY
 
 app = Flask(__name__)
-CORS(app)
+# Security: Restrict CORS to localhost and the app's own port
+CORS(app, origins=["http://127.0.0.1:5000", "http://localhost:5000"])
+
+# Security: Limit file upload size to 16MB to prevent OOM/DoS
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 os.makedirs(DATA_DIR, exist_ok=True)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 app.logger.setLevel(logging.INFO)
@@ -183,4 +187,6 @@ def api_set_key():
 if __name__ == "__main__":
     print("\n🔮 Advanced RAG Explorer — http://localhost:5001\n")
     app.logger.info("Advanced RAG Explorer starting on port 5001")
-    app.run(debug=True, port=5001, use_reloader=False)
+    # Security: Default to debug=False. Use environment variable for local development.
+    is_debug = os.getenv("FLASK_DEBUG", "False").lower() == "true"
+    app.run(host="127.0.0.1", port=5001, debug=is_debug, use_reloader=False)
